@@ -102,13 +102,14 @@ func (pkg Pkg) Revert(sha string) error {
 // Read a goopfile and get a list of packages
 func ReadGoopfile(Goopfile string) ([]Pkg, error) {
 	pkgs := []Pkg{}
+	spacesRegexp := regexp.MustCompile("\\s+")
 	goop, err := ioutil.ReadFile(Goopfile)
 	if err != nil {
 		return pkgs, err
 	}
 	lines := strings.Split(strings.Trim(string(goop), "\n"), "\n")
 	for i, line := range lines {
-		line := strings.Replace(line, "\t", " ", -1)
+		line = spacesRegexp.ReplaceAllString(line, " ")
 		pkgInfo := strings.Split(line, " ")
 		switch len(pkgInfo) {
 		case 0:
