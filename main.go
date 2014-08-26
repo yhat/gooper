@@ -96,7 +96,23 @@ func (pkg Pkg) Revert(sha string) error {
 		return fmt.Errorf("Could not reset '%s' to commit '%s'",
 			pkg.Name, sha)
 	}
-	return nil
+	wd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	err = os.Chdir(filepath.Dir(gitDir))
+	if err != nil {
+		return err
+	}
+	checkout := exec.Command("git", "checkout", ".")
+	checkout.Stderr = os.Stderr
+	err = checkout.Run()
+	if err != nil {
+		return fmt.Errorf("Could not clean '%s' to commit '%s'",
+			pkg.Name, sha)
+	}
+	err = os.Chdir(wd)
+	return err
 }
 
 // Read a goopfile and get a list of packages
@@ -169,8 +185,6 @@ func Install(args []string) {
 	}
 	for _, pkg := range pkgs {
 		pkg.Get()
-	}
-	for _, pkg := range pkgs {
 		if pkg.SHA == "" {
 			continue
 		}
